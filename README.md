@@ -1,0 +1,1 @@
+http://sugoihaskell.github.io/
