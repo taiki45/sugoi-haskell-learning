@@ -202,4 +202,6 @@ you know L, reapers eat only apples...
 ```
 
 ### ステップ1
-`getStdGen :: IO StdGen` 関数でジェネレーターを作りましょう！そして `randomRs :: (RandomGen g, Random a) => (a, a) -> g -> [a]` 関数でランダムな文字列を作ると OK ですね！
+`getStdGen :: IO StdGen` 関数でジェネレーターを作りましょう！
+
+ `randomRs :: (RandomGen g, Random a) => (a, a) -> g -> [a]` 関数でランダムな文字列を作ると OK ですね！Char で範囲を指定するとうまくいきますよ！
