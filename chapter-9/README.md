@@ -157,11 +157,11 @@ IO アクションとIOアクションをつなげるにはどうすれば…？
 $ runghc 2-exercise.hs
 =Usage=
 lock:
-    passwordProg.hs lock 'your password'
+    2-exercise.hs lock 'your password'
 open:
-    passwordProg.hs open
-$ runghc passwordProg.hs lock 'password'
-$ runghc passwordProg.hs open
+    2-exercise.hs open
+$ runghc 2-exercise.hs lock 'password'
+$ runghc 2-exercise.hs open
 What is password?
 > 123456
 Wrong!!
