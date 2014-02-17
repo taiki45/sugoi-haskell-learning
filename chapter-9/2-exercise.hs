@@ -1,4 +1,3 @@
-import Control.Exception
 import System.Environment
 
 main :: IO ()
