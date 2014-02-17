@@ -14,7 +14,7 @@ passwordPath = "password.txt"
 
 randomString :: IO String
 randomString = do gen <- getStdGen
-                  return $ take 10 $ randomRs ('0', 'Z') gen
+                  return $ take 10 $ randomRs (' ', '~') gen
 
 lock :: IO ()
 lock = do password <- randomString
@@ -48,7 +48,7 @@ while pred' a body
 
 showHelp :: IO ()
 showHelp = do putStrLn "=Usage="
-              putStrLn "lock:"
-              putStrLn "    passwordProg.hs lock 'your password'"
+              putStrLn "`lock` will write password to password.txt:"
+              putStrLn "    passwordProg.hs lock"
               putStrLn "open:"
               putStrLn "    passwordProg.hs open"
