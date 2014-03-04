@@ -107,4 +107,4 @@ TODO
 ## 演習
 Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしよう！
 
-パーサーコンビネータライブラリの作り方 -> http://d.hatena.ne.jp/tanakh/20040730
+パーサーコンビネータライブラリの作り方 -> http://d.hatena.ne.jp/tanakh/20040731
