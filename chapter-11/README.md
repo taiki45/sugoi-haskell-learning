@@ -28,6 +28,8 @@ instance Functor ((,) a) -- Defined in `GHC.Base'
 fmap (id :: a -> a) = (id :: Functor f => f a -> f a)
 ```
 
+((型Aのid函数)を持ち上げたもの) = ((持ち上げた型A)のid函数)
+
 ※ `id` 函数は多相的である
 
 ```
@@ -42,6 +44,12 @@ f x = x + 1
 g x = x * 5
 (fmap g) . (fmap f) $ Just 5 = Just $ (g . f) 5
 ```
+
+### Free Monad
+すべてのファンクターから Free Monad というモナドが導出できます
+
+* http://hackage.haskell.org/package/free
+* http://d.hatena.ne.jp/fumiexcel/20121111/1352614885
 
 ## Pointed Functor
 * 最小のファンクター値を作る函数`point`を備えているファンクター
@@ -133,7 +141,7 @@ sequence $ [Just 3, Nothing] -- Nothing
 TODO
 
 ## Functor や Applicative の意義
-
+あらゆるファンクターやアプリカティブファンクターやモナドはこのように重要な操作以外を裏に隠してしまえるただの**便利なパターン**なのです。
 
 ## 演習
 Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしましょう！
