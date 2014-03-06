@@ -151,23 +151,12 @@ Appicative Style といえばパーサー！パーサーコンビネータライ
 * `<|>` の実装でパースエラーが出る場合は2引数をとり無名関数を返すような実装しましょう。
 * 参考コードでは  `symbol` を `char` としています。
 
-### Step2
-下記のような `number` パーサを実装しましょう。
-
-```
-digit :: Parser Char Char
-digit = satisfy isDigit
-
-number :: Parser Char Integer
-number = read <$> many1 digit
-```
-
 ```
 ghci > number "234a"
 [(234,"a")]
 ```
 
-### Step3
+### Step2
 `Parser` の宣言を `type` 宣言から `newtype` 宣言に変えましょう。data constructor が必要になるので今までの一枚被さる形になります。ということはそのままだとパーサに文字列を渡すことができません。
 
 そこで、data constructor を取り外しパーサ函数に引数を渡す `parse` のような補助函数を定義しましょう。
@@ -176,22 +165,22 @@ ghci > number "234a"
 parse :: Parser s a -> [s] -> [(a,[s])]
 ```
 
-### Step4
+### Step3
 `Parser` 型を Functor にしましょう。
 
 参考: `parse` 函数のように data constructor を取り外すとうまくいきますよ。
 
-### Step5
+### Step4
 `Parser` 型を Applicative のインスタンスにしましょう。
 
 まず `Control.Applicative` を import する必要があります。今のままでは 同じ名前の函数があり、コンフリクトしてしまうので、一旦今までの実装はコメントアウトでもしましょう。Applivative のインスタンスにすると今まで実装した函数と等価な函数がメソッドとして手に入ると思います。どの函数とどのメソッドが対応するか考えてみてください。
 
-### Step6
+### Step5
 `Parser` 型を Alternative のインスタンスにしましょう。 ref: http://itpro.nikkeibp.co.jp/article/COLUMN/20120110/378061/?ST=develop&P=4
 
 `some` と `many` はおそらくデフォルト定義だと無限ループに陥ってしまうので、それぞれ定義を与えてあげましょう。
 
-### Step7
+### Step6
 `(+ 3 4)`あたりの簡単なS式をパースするパーサを実装してしまいましょう。
 
 まず、S式を表すデータ型を作成しましょう。アトム型(シンボルを表す)、数値型、文字列型、リスト型くらいがあれば良さそうに思えます。
@@ -200,7 +189,7 @@ Applicative の `<*` メソッドなどを活用したり新たなコンビネ�
 
 気が向いたら `eval` を実装してもよいですね。
 
-### Step8
+### Step99
 モナドを学習し終えたら `Parser` 型を `Monad` のインスタンスにしてみましょう。
 
 ほぼ答えは今までの実装にありますが、一点だけ以下のようなリストモナドの失敗に対する性質と do 構文を使うとスッキリ書けると思います。
