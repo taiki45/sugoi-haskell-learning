@@ -159,7 +159,7 @@ Appicative Style といえばパーサー！パーサーコンビネータライ
 * 参考コードでは  `symbol` を `char` としています。
 
 ```
-ghci > number "234a"
+ghci > natural "234a"
 [(234,"a")]
 ```
 
