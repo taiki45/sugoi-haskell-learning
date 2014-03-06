@@ -1,10 +1,10 @@
 # 11章
 
 ```
-Functor ∋ PointedFunctor ∋ Applicative Functor ∋ Monad
+Functor ∋ Applicative Functor ∋ Monad
 ```
 
-実装上は歴史的経緯と考慮すべき事情により上図のようになっていないが、全てのモナドはファンクターである。だから「IO 型はファンクターである」は変じゃないんですよ。
+実装上は歴史的経緯と考慮すべき事情により上図のようになっていないが、全てのモナドはファンクターである。実装上もほとんどのモナドはファンクターなのでこれから紹介する便利な機能や性質が使える。
 
 ## Functor
 
@@ -50,8 +50,11 @@ g x = x * 5
 * `point` は Applicative Functor の `pure` と同じ。
 
 ## Applicative Functor
+* 文脈付きの値または**計算の結果や過程**に対して Functor よりも様々な操作ができる強化版 Functor。
 * 最小のファンクター値を作る函数 `pure` を備えている。
 * 包まれた or 持ち上げられた函数にファンクター値で適用できる函数`<*>`を備えている。
+* monadic functions ではなく、Applicative functions を使って書くことを Applicative Stryle と呼ぶらしい。Applicative Style が効果的なのはパーサコンビネータを使う時。
+* ちょっと便利なファンクター、という感覚。
 
 ```
 pure (+) <*> Just 4 <*> Just 3
@@ -93,13 +96,38 @@ class Functor f => Applicative f where
     (<*) = liftA2 const
 ```
 
+Usage
+
+```
+Just 5 *> pure 0 -- Just 0
+pure "fail" <* getLine -- IO "fail"
+```
 
 ### アプリカティブ則
 TODO: いくつかのアプリカティブファンクターで証明
 
 ### ZipList
+`zipWithN` の抽象。
+
+```
+zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
+
+-- 以下は等価
+zipWith (+) [1..10] [21..30] -- [22,24,26,28,30,32,34,36,38,40]
+getZipList $ (+) <$> ZipList [1..10] <*> ZipList [21..30] -- [22,24,26,28,30,32,34,36,38,40]
+```
 
 ### sequence
+モナド版と同じ。こういうケースで便利 http://tanakh.jp/posts/2012-02-22-list-monad.html
+
+あとこんなケースとか https://gist.github.com/taiki45/9210900
+
+```
+sequence :: Monad m => [m a] -> m [a]
+sequence $ [Just 3, Just 5] -- Just [3,5]
+sequence $ [Just 3, Nothing] -- Nothing
+```
 
 ### Altenative
 TODO
@@ -108,19 +136,21 @@ TODO
 
 
 ## 演習
-Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしよう！
+Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしましょう！
 
 パーサーコンビネータライブラリの作り方 -> http://d.hatena.ne.jp/tanakh/20040731
 
 ポイント: 最初は `let` や `where` でとりあえず結果や式を留めたりパタンマッチしておいて、後でリファクタリングするやりかたがやりやすいです。※個人の感想
 
+実際に実装すると、トークンの消費状態や失敗の取り回し、といったパーサファンクター・パーサモナドが行っている裏配管の仕事がよくわかると思います。あらゆるファンクターやアプリカティブファンクターやモナドはこのように重要な操作以外を裏に隠してしまえるただの**便利なパターン**なのです。
+
 ### Step1
-`listOf` まで実装しよう。
+`listOf` まで実装しましょう。
 
 参考コードでは  `symbol` を `char` としています。
 
 ### Step2
-下記のような `number` パーサを実装しよう。
+下記のような `number` パーサを実装しましょう。
 
 ```
 digit :: Parser Char Char
@@ -136,7 +166,7 @@ ghci > number "234a"
 ```
 
 ### Step3
-`Parser` の宣言を `type` 宣言から `newtype` 宣言に変えよう。data constructor が必要になるので今までの一枚被さる形になります。ということはそのままだとパーサに文字列を渡すことができません。
+`Parser` の宣言を `type` 宣言から `newtype` 宣言に変えましょう。data constructor が必要になるので今までの一枚被さる形になります。ということはそのままだとパーサに文字列を渡すことができません。
 
 そこで、data constructor を取り外しパーサ函数に引数を渡す `parse` のような補助函数を定義しましょう。
 
@@ -160,6 +190,15 @@ parse :: Parser s a -> [s] -> [(a,[s])]
 `some` と `many` はおそらくデフォルト定義だと無限ループに陥ってしまうので、それぞれ定義を与えてあげましょう。
 
 ### Step7
+`(+ 3 4)`あたりの簡単なS式をパースするパーサを実装してしまいましょう。
+
+まず、S式を表すデータ型を作成しましょう。アトム型(シンボルを表す)、数値型、文字列型、リスト型くらいがあれば良さそうに思えます。
+
+Applicative の `<*` メソッドなどを活用したり新たなコンビネータを作成したりしましょう。
+
+気が向いたら `eval` を実装してもよいですね。
+
+### Step8
 モナドを学習し終えたら `Parser` 型を `Monad` のインスタンスにしてみましょう。
 
 ほぼ答えは今までの実装にありますが、一点だけ以下のようなリストモナドの失敗に対する性質と do 構文を使うとスッキリ書けると思います。
