@@ -104,7 +104,79 @@ TODO: いくつかのアプリカティブファンクターで証明
 ### Altenative
 TODO
 
+## Functor や Applicative の意義
+
+
 ## 演習
 Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしよう！
 
 パーサーコンビネータライブラリの作り方 -> http://d.hatena.ne.jp/tanakh/20040731
+
+ポイント: 最初は `let` や `where` でとりあえず結果や式を留めたりパタンマッチしておいて、後でリファクタリングするやりかたがやりやすいです。※個人の感想
+
+### Step1
+`listOf` まで実装しよう。
+
+参考コードでは  `symbol` を `char` としています。
+
+### Step2
+下記のような `number` パーサを実装しよう。
+
+```
+digit :: Parser Char Char
+digit = satisfy isDigit
+
+number :: Parser Char Integer
+number = read <$> many1 digit
+```
+
+```
+ghci > number "234a"
+[(234,"a")]
+```
+
+### Step3
+`Parser` の宣言を `type` 宣言から `newtype` 宣言に変えよう。data constructor が必要になるので今までの一枚被さる形になります。ということはそのままだとパーサに文字列を渡すことができません。
+
+そこで、data constructor を取り外しパーサ函数に引数を渡す `parse` のような補助函数を定義しましょう。
+
+```
+parse :: Parser s a -> [s] -> [(a,[s])]
+```
+
+### Step4
+`Parser` 型を Functor にしましょう。
+
+参考: `parse` 函数のように data constructor を取り外すとうまくいきますよ。
+
+### Step5
+`Parser` 型を Applicative のインスタンスにしましょう。
+
+まず `Control.Applicative` を import する必要があります。今のままでは 同じ名前の函数があり、コンフリクトしてしまうので、一旦今までの実装はコメントアウトでもしましょう。Applivative のインスタンスにすると今まで実装した函数と等価な函数がメソッドとして手に入ると思います。どの函数とどのメソッドが対応するか考えてみてください。
+
+### Step6
+`Parser` 型を Alternative のインスタンスにしましょう。 ref: http://itpro.nikkeibp.co.jp/article/COLUMN/20120110/378061/?ST=develop&P=4
+
+`some` と `many` はおそらくデフォルト定義だと無限ループに陥ってしまうので、それぞれ定義を与えてあげましょう。
+
+### Step7
+モナドを学習し終えたら `Parser` 型を `Monad` のインスタンスにしてみましょう。
+
+ほぼ答えは今までの実装にありますが、一点だけ以下のようなリストモナドの失敗に対する性質と do 構文を使うとスッキリ書けると思います。
+
+```
+f n | n > 10 = [n]
+    | otherwise = []
+
+-- a = [(110,12)]
+a = do n1 <- f 11
+       let x = n1 * 10
+       n2 <- f 12
+       return (x,n2)
+
+-- b = []
+b = do n1 <- f 9
+       let x = n1 * 10
+       n2 <- f 12
+       return (x,n2)
+```
