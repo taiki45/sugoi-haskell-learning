@@ -190,6 +190,13 @@ parse (succ `fmap` char 'c') "ceb" -- [('d',"eb")]
 
 まず `Control.Applicative` を import する必要があります。今のままでは 同じ名前の函数があり、コンフリクトしてしまうので、一旦今までの実装はコメントアウトでもしましょう。Applivative のインスタンスにすると今まで実装した函数と等価な函数がメソッドとして手に入ると思います。どの函数とどのメソッドが対応するか考えてみてください。
 
+目標
+
+```
+parse ((:) <$> char 'c' <*> pure []) "ceb" -- [("c","ceb")]
+parse (char 'c' *> pure 0) "ceb" -- [(0,"ceb")]
+```
+
 ### Step5
 `Parser` 型を Alternative のインスタンスにしましょう。 ref: http://itpro.nikkeibp.co.jp/article/COLUMN/20120110/378061/?ST=develop&P=4
 
