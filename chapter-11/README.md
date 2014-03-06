@@ -216,9 +216,37 @@ parse ((*100) <$> natural) "456agd" -- [(45600,"agd")]
 
 まず、S式を表すデータ型を作成しましょう。アトム型(シンボルを表す)、数値型、文字列型、リスト型くらいがあれば良さそうに思えます。
 
+参考実装
+
+```
+data Value = Atom String
+           | Number Integer
+           | String String
+           | List [Value]
+           deriving Show
+```
+
 Applicative の `<*` メソッドなどを活用したり新たなコンビネータを作成したりしましょう。
 
 気が向いたら `eval` を実装してもよいですね。
+
+#### 目標
+
+```
+parse (parseExpr) "(+ 3 4)" -- [(List [Atom "+",Number 3,Number 4],"")]
+```
+
+#### 道筋
+* 与えられた文字のどれかのマッチするようなコンビネータを定義する。`oneOf :: Eq s => [s] -> Parser s s`
+* アルファベット全てにマッチする `alphabet :: Parser Char Char` を定義
+* 与えられた文字のどれにもマッチしないようなコンビネータを定義する。 `noneOf :: Eq s => [s] -> Parser s s`
+* 数値リテラルのパーサ `parseNumber :: Parser Char Value` を定義
+* 文字列リテラルのパーサ `parseString :: Parser Char Value` を定義
+* アトムのパーサ `parseAtom :: Parser Char Value` を定義
+* 以前に実装した `(<&>) :: Parser s a -> Parser s b -> Parser s (a,b)` を新 `Parser` 向けに定義する。
+* 以前に実装した `listOf :: Parser s a -> Parser s b -> Parser s [a]` を再定義する。
+* 括弧の内側をパースするパーサ `parseList :: Parser Char Value` を定義する。
+* S式をパースする `parseExpr :: Parser Char Value` を定義する。
 
 ### Step99
 モナドを学習し終えたら `Parser` 型を `Monad` のインスタンスにしてみましょう。

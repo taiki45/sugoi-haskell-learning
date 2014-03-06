@@ -9,6 +9,7 @@ satisfy :: (s -> Bool) -> Parser s s
 satisfy p = P f
     where f (x:xs) | p x       = [(x,xs)]
                    | otherwise = []
+          f _ = []
 
 char :: Eq s => s -> Parser s s
 char c = satisfy (c ==)
