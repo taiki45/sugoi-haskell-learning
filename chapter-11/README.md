@@ -54,6 +54,7 @@ g x = x * 5
 * 包まれた or 持ち上げられた函数にファンクター値で適用できる函数`<*>`を備えている。
 * monadic functions ではなく、Applicative functions を使って書くことを Applicative Stryle と呼ぶらしい。Applicative Style が効果的なのはパーサコンビネータを使う時。
 * ちょっと便利なファンクター、という感覚。
+* アプリカティブのススメ http://d.hatena.ne.jp/kazu-yamamoto/20101211/1292021817
 
 ```
 pure (+) <*> Just 4 <*> Just 3
