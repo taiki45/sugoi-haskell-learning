@@ -175,7 +175,13 @@ parse :: Parser s a -> [s] -> [(a,[s])]
 簡単ないくつかのコンビネータを新しい `Parser` 型を使って定義しなおしましょう。他の函数はとりあえずコメントアウトしましょう。
 
 ### Step3
-`Parser` 型を Functor にしましょう。
+`Parser` 型を Functor にしましょう。ついでに `parse` 函数もレコード構文で `Parser` 型に埋め込めるのでやってしまいましょう。
+
+目標
+
+```
+parse (succ `fmap` char 'c') "ceb" -- [('d',"eb")]
+```
 
 参考: `parse` 函数のように data constructor を取り外すとうまくいきますよ。
 
