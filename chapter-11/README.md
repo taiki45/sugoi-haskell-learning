@@ -200,7 +200,7 @@ parse (char 'c' *> pure 0) "ceb" -- [(0,"ceb")]
 ### Step5
 `Parser` 型を Alternative のインスタンスにしましょう。 ref: http://itpro.nikkeibp.co.jp/article/COLUMN/20120110/378061/?ST=develop&P=4
 
-`some` と `many` はおそらくデフォルト定義だと無限ループに陥ってしまうので、それぞれ定義を与えてあげましょう。
+`some` と `many` はデフォルト定義でもいけますが、練習として定義を与えてみてもよいですね。
 
 目標
 
