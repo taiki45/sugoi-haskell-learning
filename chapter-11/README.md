@@ -202,6 +202,15 @@ parse (char 'c' *> pure 0) "ceb" -- [(0,"ceb")]
 
 `some` と `many` はおそらくデフォルト定義だと無限ループに陥ってしまうので、それぞれ定義を与えてあげましょう。
 
+目標
+
+```
+natural :: Parser Char Integer
+natural = read <$> some (satisfy isDigit)
+
+parse ((*100) <$> natural) "456agd" -- [(45600,"agd")]
+```
+
 ### Step6
 `(+ 3 4)`あたりの簡単なS式をパースするパーサを実装してしまいましょう。
 
