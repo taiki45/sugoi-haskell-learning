@@ -24,7 +24,7 @@ instance Functor ((,) a) -- Defined in `GHC.Base'
 ### 1
 ファンクターF, 型 A について (F idA) = (F A)id
 
-```
+```haskell
 fmap (id :: a -> a) = (id :: Functor f => f a -> f a)
 ```
 
@@ -32,14 +32,14 @@ fmap (id :: a -> a) = (id :: Functor f => f a -> f a)
 
 ※ `id` 函数は多相的である
 
-```
+```haskell
 fmap (id :: Int -> Int) $ Just 4 = (id :: Functor f => f Int -> f Int) $ Just 4
 ```
 
 ### 2
 ファンクターF, 型a, b, c, 函数 f: a -> b, g: b -> c について、(F g) ○ (F f) = F (g ○ f)
 
-```
+```haskell
 f x = x + 1
 g x = x * 5
 (fmap g) . (fmap f) $ Just 5 = Just $ (g . f) 5
@@ -64,7 +64,7 @@ g x = x * 5
 * ちょっと便利なファンクター、という感覚。
 * アプリカティブのススメ http://d.hatena.ne.jp/kazu-yamamoto/20101211/1292021817
 
-```
+```haskell
 pure (+) <*> Just 4 <*> Just 3
 -- Just 7
 pure (+) <*> Nothing <*> Just 3
@@ -87,7 +87,7 @@ instance Applicative ((->) a) -- Defined in `Control.Applicative'
 
 ### Applicative functions
 
-```
+```haskell
 class Functor f => Applicative f where
     -- | Lift a value.
     pure :: a -> f a
@@ -106,7 +106,7 @@ class Functor f => Applicative f where
 
 Usage
 
-```
+```haskell
 Just 5 *> pure 0 -- Just 0
 pure "fail" <* getLine -- IO "fail"
 ```
@@ -117,7 +117,7 @@ TODO: いくつかのアプリカティブファンクターで証明
 ### ZipList
 `zipWithN` の抽象。
 
-```
+```haskell
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 zipWith3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
 
@@ -131,7 +131,7 @@ getZipList $ (+) <$> ZipList [1..10] <*> ZipList [21..30] -- [22,24,26,28,30,32,
 
 あとこんなケースとか https://gist.github.com/taiki45/9210900
 
-```
+```haskell
 sequence :: Monad m => [m a] -> m [a]
 sequence $ [Just 3, Just 5] -- Just [3,5]
 sequence $ [Just 3, Nothing] -- Nothing
@@ -176,7 +176,7 @@ ghci > natural "234a"
 
 そこで、data constructor を取り外しパーサ函数に引数を渡す `parse` のような補助函数を定義しましょう。
 
-```
+```haskell
 parse :: Parser s a -> [s] -> [(a,[s])]
 ```
 
@@ -187,7 +187,7 @@ parse :: Parser s a -> [s] -> [(a,[s])]
 
 目標
 
-```
+```haskell
 parse (succ `fmap` char 'c') "ceb" -- [('d',"eb")]
 ```
 
@@ -200,7 +200,7 @@ parse (succ `fmap` char 'c') "ceb" -- [('d',"eb")]
 
 目標
 
-```
+```haskell
 parse ((:) <$> char 'c' <*> pure []) "ceb" -- [("c","ceb")]
 parse (char 'c' *> pure 0) "ceb" -- [(0,"ceb")]
 ```
@@ -212,7 +212,7 @@ parse (char 'c' *> pure 0) "ceb" -- [(0,"ceb")]
 
 目標
 
-```
+```haskell
 natural :: Parser Char Integer
 natural = read <$> some (satisfy isDigit)
 
@@ -226,7 +226,7 @@ parse ((*100) <$> natural) "456agd" -- [(45600,"agd")]
 
 参考実装
 
-```
+```haskell
 data Value = Atom String
            | Number Integer
            | String String
@@ -240,7 +240,7 @@ Applicative の `<*` メソッドなどを活用したり新たなコンビネ�
 
 #### 目標
 
-```
+```haskell
 parse (parseExpr) "(+ 3 4)" -- [(List [Atom "+",Number 3,Number 4],"")]
 ```
 
@@ -263,7 +263,7 @@ parse (parseExpr) "(+ 3 4)" -- [(List [Atom "+",Number 3,Number 4],"")]
 
 ほぼ答えは今までの実装にありますが、一点だけ以下のようなリストモナドの失敗に対する性質と do 構文を使うとスッキリ書けると思います。
 
-```
+```haskell
 f n | n > 10 = [n]
     | otherwise = []
 
