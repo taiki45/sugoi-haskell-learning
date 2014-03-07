@@ -45,6 +45,27 @@ g x = x * 5
 (fmap g) . (fmap f) $ Just 5 = Just $ (g . f) 5
 ```
 
+### Data.Functor
+基本となる functor functions 以外に便利 functions が定義されてる。
+
+```haskell
+-- | An infix synonym for 'fmap'.
+(<$>) :: Functor f => (a -> b) -> f a -> f b
+(<$>) = fmap
+
+class  Functor f  where
+    fmap        :: (a -> b) -> f a -> f b
+
+    -- | Replace all locations in the input with the same value.
+    -- The default definition is @'fmap' . 'const'@, but this may be
+    -- overridden with a more efficient version.
+    (<$)        :: a -> f b -> f a
+    (<$)        =  fmap . const
+
+-- Usage
+"Replaced" <$ Just 5 -- "Replaced" <$ Just 5
+```
+
 ### Free Monad
 すべてのファンクターから Free Monad というモナドが導出できます
 
