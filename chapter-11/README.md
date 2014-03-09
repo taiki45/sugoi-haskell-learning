@@ -7,9 +7,10 @@
 
 ## Functor
 
-* ファンクターは箱あるいは文脈付きの値、あるいは**計算**。
+* ファンクターは文脈付きの値、あるいは**計算**。
 * 「X がファンクターである」と言えることは「X は函数で写せるなにがである」ということ。
 * `fmap` は函数の持ち上げと適用を行う。
+* 「ファンクタ = 箱」と考えていると関数の性質を持つファンクタで死ぬので計算とｲﾒｯｼﾞしておくのが無難 ※個人の意見
 
 ```
 instance Functor Maybe -- Defined in `Data.Maybe'
@@ -48,9 +49,7 @@ g x = x * 5
 ### Data.Functor
 基本となる functor functions 以外に便利 functions が定義されてる。
 
-後で学ぶモナドと組み合わせる時に
-
->`<$`演算子は、複数の計算から一つの大きな計算を組み立てる際、組み立てる計算の中に何らかの作用を持つ計算を組み込むのに役立ちます。
+後で学ぶモナドと組み合わせる時に、`<$` 演算子は複数の計算から一つの大きな計算を組み立てる際、組み立てる計算の中に何らかの作用を持つ計算を組み込むのに役立ちます。
 
 ```haskell
 -- | An infix synonym for 'fmap'.
@@ -67,7 +66,7 @@ class  Functor f  where
     (<$)        =  fmap . const
 
 -- Usage
-"Replaced" <$ Just 5 -- "Replaced" <$ Just 5
+"Replaced" <$ Just 5 -- Just "Replaces"
 ```
 
 ### Free Monad
@@ -75,6 +74,7 @@ class  Functor f  where
 
 * http://hackage.haskell.org/package/free
 * http://d.hatena.ne.jp/fumiexcel/20121111/1352614885
+* http://myuon-myon.hatenablog.com/entry/20121111/1352608035
 
 ## Pointed Functor
 * 最小のファンクター値を作る函数`point`を備えているファンクター
@@ -88,6 +88,7 @@ class  Functor f  where
 * monadic functions ではなく、Applicative functions を使って書くことを Applicative Stryle と呼ぶらしい。Applicative Style が効果的なのはパーサコンビネータを使う時。
 * ちょっと便利なファンクター、という感覚。
 * アプリカティブのススメ http://d.hatena.ne.jp/kazu-yamamoto/20101211/1292021817
+* paper をご所望ですか？ http://www.soi.city.ac.uk/~ross/papers/Applicative.html
 
 ```haskell
 pure (+) <*> Just 4 <*> Just 3
@@ -137,7 +138,55 @@ pure "fail" <* getLine -- IO "fail"
 ```
 
 ### アプリカティブ則
-TODO: いくつかのアプリカティブファンクターで証明
+ファンクタF, 型A,B,C,Ds, 関数f:A->B,g:B->C
+
+Fで持ち上げられた型Aを`FA`と書く、Fで持ち上げられた関数fを`Ff`と書く、Aのidを`Aid`と書く、FAのidを`FAid`と書く
+
+#### identity 単位元律
+`pure id <*> v = v`, この時 `v :: (F A)`, `id :: A -> A`
+
+(F(Aid))(FA) = FA、idにフォーカスすると F(Aid) = FAid
+
+「持ち上げたidで持ち上げた型を写す = 持ち上げた型」、idにフォーカスすると「持ち上げたid = 持ち上げた型のid」※ Haskellのidは多相的なので表現を変えている
+
+#### composition 合成
+`pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
+
+(Fg○Ff)(FA) = Fg(Ff(FA)) = FC
+
+合成の性質を保存する
+
+#### homomorphism 準同型
+`pure f <*> pure x = pure (f x)`
+
+Ff(FA) = F(f(A))
+
+持ち上げた型を持ち上げた関数で写す = 関数で写した結果を持ち上げる
+
+#### interchange 
+`u <*> pure y = pure ($ y) <*> u`
+
+`$` 演算子を使うことで演算の順序を入れ替えても等価になること。
+
+http://planetmath.org/interchangelaw
+
+#### Maybe でやってみる
+```haskell
+-- 1. identity
+ghci> (pure id <*> Just 0) == Just 0
+True
+-- 2.composition
+ghci>  pure (.) <*> pure (+1) <*> pure (*5) <*> Just 3
+Just 16
+ghci> pure (+1) <*> (pure (*5) <*> Just 3)
+Just 16
+-- 3. homomorphism
+ghci> (pure succ <*> Just 3) == (pure $ succ 3)
+True
+-- 4.interchange
+ghci> (Just succ <*> pure 3) == (pure ($ 3) <*> Just succ)
+True
+```
 
 ### ZipList
 `zipWithN` の抽象。
@@ -165,7 +214,7 @@ sequence $ [Just 3, Nothing] -- Nothing
 ### Alternative
 `Alternative` は失敗が表現できる計算のための型クラスです。
 
-基本的には失敗を表現する `empty` と計算をつなぎ合わせる `<|>` 演算子で構成されます。`<|>` の計算のつなげ合わせ方は **選択**です。
+基本的には失敗を表現する `empty` と計算をつなぎ合わせる `<|>` 演算子で構成されます。`<|>` の計算のつなげ合わせ方は**選択**です。
 
 さらに「何度も繰り返し適用することで、成功から失敗へと状態を遷移させる」性質を持つような計算の場合、`some`, `many` メソッドが活用できます。`many`,`some` は計算が失敗するまで計算を繰り返し行い結果をリストにためこみます。失敗した時点で成功した結果のリストを返します。`many` の場合は初回の計算に失敗しても空リストを返します。対して `some` は初回の失敗に対しては `empty` を返します。
 
@@ -184,7 +233,7 @@ Maybe の成功値に対する `some`, `many` は何度繰り返しても成功�
 
 次は List で試してみましょう。リストの文脈での失敗は空リストです。
 
-```haksell
+```haskell
 [] <|> [1..5] -- [1,2,3,4,5]
 [1..5] <|> [1..5] -- [1,2,3,4,5,1,2,3,4,5]
 
@@ -193,10 +242,10 @@ some [1..5] -- 無限ループ
 
 List も成功を何度繰り返しても失敗することはありません。
 
-下記の演習で確かめますが、`some`, `many` が活用できるのはパーサような計算の場合です。
+下記の演習で確かめますが、`some`, `many` が活用できるのはパーサのような計算の場合です。
 
 ## Functor や Applicative の意義
-あらゆるファンクターやアプリカティブファンクターやモナドはこのように重要な操作以外を裏に隠してしまえるただの**便利なパターン**なのです。
+あらゆるファンクターやアプリカティブファンクターやモナドは重要な操作以外を裏に隠してしまえるただの**便利パターン**なのです。
 
 ## 演習
 Appicative Style といえばパーサー！パーサーコンビネータライブラリを作ってそれを Applicative Functor に仕立て上げ、Applicative Style で書けるようにしましょう！
@@ -212,7 +261,7 @@ Appicative Style といえばパーサー！パーサーコンビネータライ
 
 ポイント: 最初は `let` や `where` でとりあえず結果や式を留めたりパタンマッチしておいて、後でリファクタリングするやりかたがやりやすいです。※個人の感想
 
-実際に実装すると、トークンの消費状態や失敗の取り回し、といったパーサファンクター・パーサモナドが行っている裏配管の仕事がよくわかると思います。あらゆるファンクターやアプリカティブファンクターやモナドはこのように重要な操作以外を裏に隠してしまえるただの**便利なパターン**なのです。
+実際に実装すると、トークンの消費状態や失敗の取り回し、といったパーサファンクター・パーサモナドが行っている裏配管の仕事がよくわかると思います。あらゆるファンクターやアプリカティブファンクターやモナドはこのように重要な操作以外を裏に隠してしまえるただの**便利パターン**なのです。
 
 ### Step1
 `listOf` まで実装しましょう。
