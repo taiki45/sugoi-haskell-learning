@@ -1,6 +1,6 @@
 {-
 - $ runghc main.hs '(+ (- 5 4) 5)'
-- Number 6
+- Right (Number 6)
 -}
 
 import Control.Applicative
@@ -34,11 +34,12 @@ eval _ (Number a) = return (Number a)
 eval _ (String a) = return (String a)
 --eval env (Atom a) = lookup a env
 eval env (List ((Atom a):xs)) = do f <- lookupEnv a env
-                                   apply f <$> sequence (map (eval env) xs)
+                                   args <- sequence (map (eval env) xs)
+                                   apply f args
 
--- TODO: Func -> [Value] -> Either String Value
-apply :: Func -> [Value] -> Value
-apply f args = f args
+-- TODO: add type error handling
+apply :: Func -> [Value] -> RunTimeError Value
+apply f args = return $ f args
 
 lookupEnv :: String -> Env -> RunTimeError Func
 lookupEnv key env = case lookup key env of
