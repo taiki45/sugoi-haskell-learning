@@ -340,7 +340,7 @@ data Value = Atom String
 
 Applicative の `<*` メソッドなどを活用したり新たなコンビネータを作成したりしましょう。
 
-気が向いたら `eval` を実装してもよいですね。
+気が向いたら `eval` を実装してもよいですね。`11a0e8b:chapter-11/main.hs` に Maybe を使った素朴な実装があります。`git show` などで見れます。
 
 #### 目標
 
