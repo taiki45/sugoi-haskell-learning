@@ -175,16 +175,35 @@ http://planetmath.org/interchangelaw
 -- 1. identity
 ghci> (pure id <*> Just 0) == Just 0
 True
+
 -- 2.composition
 ghci>  pure (.) <*> pure (+1) <*> pure (*5) <*> Just 3
 Just 16
 ghci> pure (+1) <*> (pure (*5) <*> Just 3)
 Just 16
+
+ghci> let v = Just (+5)
+ghci> let u = Just (*3)
+ghci> let w = Just 10
+ghci> (pure (.) <*> u <*> v <*> w) == (u <*> (v <*> w))
+True
+
 -- 3. homomorphism
 ghci> (pure succ <*> Just 3) == (pure $ succ 3)
 True
+
+ghci> let f = (+5)
+ghci> let x = 3
+ghci> (pure f <*> pure x :: Maybe Integer) == (pure (f x))
+True
+
 -- 4.interchange
 ghci> (Just succ <*> pure 3) == (pure ($ 3) <*> Just succ)
+True
+
+ghci> let y = 3
+ghci> let u = Just (+5)
+ghci> (u <*> pure y) == (pure ($ y) <*> u)
 True
 ```
 
