@@ -65,4 +65,4 @@ listOf p s = p <&> many (s &> p) <@ (\(l,ls) -> l:ls)
          <|> success []
 
 commaSep :: Parser Char a -> Parser Char [a]
-commaSep p = listOf p (symbol ',')
+commaSep p = listOf p (char ',')
