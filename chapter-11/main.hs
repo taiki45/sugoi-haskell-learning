@@ -4,7 +4,7 @@
 -}
 
 import Control.Applicative
-import System.Environment
+import System.Environment (getArgs)
 
 import ParserCombinator
 
@@ -16,6 +16,7 @@ data Value = Number Integer
 
 type Func = [Value] -> Value
 type Env = [(String, Func)]
+type RunTimeError = Either String
 
 main :: IO ()
 main = do args <- getArgs
@@ -25,21 +26,24 @@ main = do args <- getArgs
 
 run :: String -> IO ()
 run input = case parse parseExpr input of
-                ((r, _):_) -> case eval defaultEnv r of
-                                  Just a -> putStrLn . show $ a
-                                  Nothing -> putStrLn "fail"
+                ((r, _):_) -> putStrLn . show $ eval defaultEnv r
                 _ -> putStrLn "invalid input"
 
-eval :: Env -> Value -> Maybe Value
-eval _ (Number a) = Just (Number a)
-eval _ (String a) = Just (String a)
+eval :: Env -> Value -> RunTimeError Value
+eval _ (Number a) = return (Number a)
+eval _ (String a) = return (String a)
 --eval env (Atom a) = lookup a env
-eval env (List ((Atom a):xs)) = do f <- lookup a env
+eval env (List ((Atom a):xs)) = do f <- lookupEnv a env
                                    apply f <$> sequence (map (eval env) xs)
 
 -- TODO: Func -> [Value] -> Either String Value
 apply :: Func -> [Value] -> Value
 apply f args = f args
+
+lookupEnv :: String -> Env -> RunTimeError Func
+lookupEnv key env = case lookup key env of
+                      Just a -> return a
+                      Nothing -> Left $ "Can't find: " ++ key
 
 defaultEnv :: Env
 defaultEnv = [("+", add)
