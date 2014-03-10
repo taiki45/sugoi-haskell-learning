@@ -345,7 +345,7 @@ Applicative の `<*` メソッドなどを活用したり新たなコンビネ�
 #### 目標
 
 ```haskell
-parse (parseExpr) "(+ 3 4)" -- [(List [Atom "+",Number 3,Number 4],"")]
+parse parseExpr "(+ 3 4)" -- [(List [Atom "+",Number 3,Number 4],"")]
 ```
 
 #### 道筋
