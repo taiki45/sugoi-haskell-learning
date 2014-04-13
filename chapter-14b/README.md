@@ -17,7 +17,22 @@ fmap (+4) l
 fmap (+4) r
 ```
 
-TODO: 現在の実装 p342
+### 現在の実装
+```haskell
+data  Either a b  =  Left a | Right b
+  deriving (Eq, Ord, Read, Show, Typeable)
+
+instance Functor (Either a) where
+    fmap _ (Left x) = Left x
+    fmap f (Right y) = Right (f y)
+
+instance Monad (Either e) where
+    return = Right
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
+```
+
+Typeable http://hackage.haskell.org/package/base-4.7.0.0/docs/Data-Typeable.html
 
 ### コラム: Either のもうひとつの側面
 エラー処理に使われる以外にもっと一般的に使える。
