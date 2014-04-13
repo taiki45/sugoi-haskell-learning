@@ -121,7 +121,16 @@ ghci> powerset [1,2,3]
 
 ```haskell
 
+filterM' :: Monad m => (a -> m Bool) -> [a] -> m [a]
+filterM' _ [] = return []
+filterM' p (x:xs) = do result <- p x
+                       if result
+                           then do xs' <- filterM' p xs
+                                   return $ x:xs'
+                           else filterM' p xs
 ```
+
+filterM を実装してみました。実装をもとに処理をおっかけていけば powerset の不思議な力もわかります。
 
 ### foldM, foldM_
 
