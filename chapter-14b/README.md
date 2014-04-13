@@ -24,3 +24,14 @@ TODO: 現在の実装 p342
 
 文脈付きの or。片方のみに処理をする、文脈によって処理をわける、ということが可能。https://gist.github.com/taiki45/8007954
 
+## 14.5 モナディック関数特集
+### liftM, ap
+leftM は fmap と同じ。ap は <*> と同じ。
+
+```haskell
+reverse `liftM` getLine
+reverse `fmap` getLine
+
+((*) <$> [1..3]) `ap` [5..7]
+(*) <$> [1..3] <*> [5..7]
+```
