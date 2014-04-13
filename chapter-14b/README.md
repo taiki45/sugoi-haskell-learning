@@ -120,7 +120,6 @@ ghci> powerset [1,2,3]
 ```
 
 ```haskell
-
 filterM' :: Monad m => (a -> m Bool) -> [a] -> m [a]
 filterM' _ [] = return []
 filterM' p (x:xs) = do result <- p x
@@ -134,9 +133,21 @@ filterM を実装してみました。実装をもとに処理をおっかけて
 
 ### foldM, foldM_
 
+## 14.7 モナディック関数の合成
+```haskell
+ghci> let lookup_ = flip lookup
+ghci> :t lookup_ employees >=> lookup_ companies
+lookup_ employees >=> lookup_ companies :: [Char] -> Maybe [Char]
+
+ghci> lookup_ employees >=> lookup_ companies $ "taiki"
+Just "OsakanaSuisan"
+ghci> lookup_ employees >=> lookup_ companies $ "john"
+Nothing
+```
+
 ## 14.6 安全な逆ポーランド記法電卓
 
-## 14.7 モナディック関数の合成
+
 
 ## 14.8 モナドを作る
 
