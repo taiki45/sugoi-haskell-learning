@@ -6,15 +6,11 @@ Maybe も Either も失敗を表せる。Maybe は失敗した計算の以降の
 
 Right で成功 + 値を、Left で失敗 + 値を持つ。
 
-Functor として考えるとわかりやすい。Left value は mapping されない、Right value は mapping される。なので、Left の場合は一切の計算が mapping されず Right の場合は以降の計算が mapping される。このようにしてエラー処理を実現している。
+Functor として考えるとわかりやすい。Left value は mapping されない、Right value は mapping される。なので、Left の場合は一切の計算が mapping されず、 Right の場合は以降の計算が mapping される。このようにしてエラー処理を実現している。
 
 ```haskell
-let l = Left "abc"
-let r = Right 5
-
-fmap (+4) l
-
-fmap (+4) r
+fmap (+4) Left "abc"
+fmap (+4) Right 5
 ```
 
 ### 現在の実装
@@ -147,6 +143,20 @@ filterM' p (x:xs) = do result <- p x
 filterM を実装してみました。実装をもとに処理をおっかけていけば powerset の不思議な力もわかります。
 
 ### foldM, foldM_
+```haskell
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldM :: Monad m => (a -> b -> m a) -> a -> [b] -> m a
+foldM_ :: Monad m => (a -> b -> m a) -> a -> [b] -> m ()
+```
+
+```haskell
+ghci> foldM_ (\a b -> print (a+b) >> return (a*b)) 1 [1..5]
+2
+3
+5
+10
+29
+```
 
 ## 14.7 モナディック関数の合成
 ```haskell
