@@ -146,8 +146,30 @@ Nothing
 ```
 
 ## 14.6 安全な逆ポーランド記法電卓
+### 通常 ver.
+```haskell
+module RpnSolver where
 
+solveRPN :: String -> Double
+solveRPN = head . foldl foldingFunction [] . words
 
+-- スタックと演算子の都合があえば計算
+-- そうでなければ数字をスタックに積む
+foldingFunction :: [Double] -> String -> [Double]
+foldingFunction (x:y:ys) "*" = (y * x):ys
+foldingFunction (x:y:ys) "+" = (y + x):ys
+foldingFunction (x:y:ys) "-" = (y - x):ys
+foldingFunction xs n = read n:xs
+```
+
+```haskell
+ghci> solveRPN "4 5 3 +"
+8.0
+ghci> solveRPN "4 5 3 a"
+*** Exception: Prelude.read: no parse
+ghci> solveRPN "4 5 3 ++"
+*** Exception: Prelude.read: no parse
+```
 
 ## 14.8 モナドを作る
 
