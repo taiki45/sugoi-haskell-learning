@@ -231,6 +231,79 @@ Left "can't match with given string: a"
 ```
 
 ## 14.8 モナドを作る
+```haskell
+module CreateMonad where
+
+import Control.Applicative
+import Data.Ratio
+import Data.Char
+
+newtype Prob a = Prob { getProb :: [(a,Rational)] }
+               deriving Show
+
+-- ghci> fmap negate $ Prob [(2,1%2),(3,1%4),(4,1%4)]
+-- Prob {getProb = [(-2,1 % 2),(-3,1 % 4),(-4,1 % 4)]}
+instance Functor Prob where
+         f `fmap` (Prob xs) = Prob $ fstmap f <$> xs
+            where fstmap :: (a -> c) -> (a,b) -> (c,b)
+                  g `fstmap` (a,b) = (g a,b)
+
+instance Applicative Prob where
+        pure = return
+        (Prob fs) <*> (Prob xs) = Prob $ mul `map` fs <*> xs
+            where mul (f,x) (a,y) = (f a,x*y)
+
+instance Monad Prob where
+        return a = Prob [(a,1)]
+        m >>= f = flatten $ f <$> m
+
+-- Prob
+--   [ (Prob [('a',1%2), ('b',1%2)],1%4)
+--   , (Prob [('c',1%2), ('d',1%2)[,3%4) ]
+--
+-- unwrap (Prob [('a',1%2), ('b',1%2)], 1%4)
+--   -> [('a',1%8), ('b',1%8)]
+--
+-- app 1%4 ('a',1%2)
+--   -> ('a',1%8)
+flatten :: Prob (Prob a) -> Prob a
+flatten (Prob xs) = Prob . concat $ unwrap `map` xs
+    where unwrap :: (Prob a,Rational) -> [(a,Rational)]
+          unwrap (Prob ls,x) = map (app x) ls
+          app :: Rational -> (a,Rational) -> (a,Rational)
+          app x = fmap (x *)
+
+testA :: Prob Char
+testA = Prob [('a',1%2), ('b',1%2)]
+
+testB :: Prob Char
+testB = Prob [('c',1%2), ('d',1%2)]
+
+testF :: Prob (Char -> Int)
+testF = Prob [(ord,1%4), (ord,3%4)]
+
+testCartesian :: Prob (Prob Char)
+testCartesian = Prob [(testA,1%4), (testB,3%4)]
+```
+
+試してみましょう。
+
+```haskell
+ghci> ord <$> testA
+Prob {getProb = [(97,1 % 2),(98,1 % 2)]}
+
+ghci> testF <*> testA
+Prob {getProb = [(97,1 % 8),(98,1 % 8),(97,3 % 8),(98,3 % 8)]}
+
+ghci> flatten testCartesian
+Prob {getProb = [('a',1 % 8),('b',1 % 8),('c',3 % 8),('d',3 % 8)]}
+
+ghci> testA >>= (\a -> return $ ord a)
+Prob {getProb = [(97,1 % 2),(98,1 % 2)]}
+
+ghci> testA >>= \c -> Prob [([c,'a'], 3%4), ([c,'b'], 1%4)]
+Prob {getProb = [("aa",3 % 8),("ab",1 % 8),("ba",3 % 8),("bb",1 % 8)]}
+```
 
 ## 演習. リストモナドをつくる
 - ステップ1. join_ のような関数を定義して、モナドを平らにすることを考えましょう。モナドのインスタンス宣言では m >>= f = join_ $ f `fmap` m で済ませてしましょうましょう。
