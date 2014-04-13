@@ -100,7 +100,7 @@ putStrLn . reverse <$> getLine :: IO (IO ())
 
 このように、文脈付きの値の使ってさらに文脈付きの値を返すような処理はよくあります。そこで、モナドというアイディアが登場がするのです！
 
-誤解を恐れずにいうとモナドというパターンは、join を持った Functor と考えましょう、ということです。join は Functor の重なりを平らにする関数です。これがあれば bind (>>=) がなくても上のような問題は解決できます！
+誤解を恐れずにいうとモナドというパターンは、join を持った Functor を考えましょう、ということです。join は Functor の重なりを平らにする関数です。これがあれば bind (>>=) がなくても上のような問題は解決できます！
 
 ```haskel
 ghci> join $ flip lookup companies `fmap` lookup "taiki" employees
