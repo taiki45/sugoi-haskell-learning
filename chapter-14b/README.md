@@ -202,6 +202,38 @@ ghci> solveRPN "4 5 3 ++"
 Nothing
 ```
 
+### Either 版
+
+```haskell
+module RpnSolver where
+
+import Control.Monad
+
+type Error = Either String
+
+solveRPN :: String -> Error Double
+solveRPN = fmap head . foldM foldingFunction [] . words
+
+-- スタックと演算子の都合があえば計算
+-- そうでなければ数字をスタックに積む
+foldingFunction :: [Double] -> String -> Error [Double]
+foldingFunction (x:y:ys) "*" = return $ (y * x):ys
+foldingFunction (x:y:ys) "+" = return $ (y + x):ys
+foldingFunction (x:y:ys) "-" = return $ (y - x):ys
+foldingFunction xs s = case reads s of
+                           (n,_):_ -> return $ n:xs
+                           _      -> Left $ "can't match with given string: " ++ s
+```
+
+```haskell
+ghci> solveRPN "4 5 3 +"
+Right 8.0
+ghci> solveRPN "4 5 3 ++"
+Left "can't match with given string: ++"
+ghci> solveRPN "4 5 3 a"
+Left "can't match with given string: a"
+```
+
 ## 14.8 モナドを作る
 
 ## 演習. リストモナドをつくる
