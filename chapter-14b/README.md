@@ -180,8 +180,6 @@ import Control.Monad
 solveRPN :: String -> Maybe Double
 solveRPN = fmap head . foldM foldingFunction [] . words
 
--- スタックと演算子の都合があえば計算
--- そうでなければ数字をスタックに積む
 foldingFunction :: [Double] -> String -> Maybe [Double]
 foldingFunction (x:y:ys) "*" = return $ (y * x):ys
 foldingFunction (x:y:ys) "+" = return $ (y + x):ys
@@ -214,8 +212,6 @@ type Error = Either String
 solveRPN :: String -> Error Double
 solveRPN = fmap head . foldM foldingFunction [] . words
 
--- スタックと演算子の都合があえば計算
--- そうでなければ数字をスタックに積む
 foldingFunction :: [Double] -> String -> Error [Double]
 foldingFunction (x:y:ys) "*" = return $ (y * x):ys
 foldingFunction (x:y:ys) "+" = return $ (y + x):ys
@@ -238,4 +234,4 @@ Left "can't match with given string: a"
 
 ## 演習. リストモナドをつくる
 - ステップ1. join_ のような関数を定義して、モナドを平らにすることを考えましょう。モナドのインスタンス宣言では m >>= f = join_ $ f `fmap` m で済ませてしましょうましょう。
-- ステップ2. join_ のことは一旦わすれて力ずくで >>= を実装してみましょう。
+- ステップ2. join_ のことは一旦忘れて力ずくで >>= を実装してみましょう。
