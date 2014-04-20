@@ -39,3 +39,26 @@ elemAt (L:ds) (Node _ l _) = elemAt ds l
 elemAt (R:ds) (Node _ _ r) = elemAt ds r
 elemAt [] (Node a _ _) = a
 elemAt _ Empty = error "Empty node"
+
+data Crumb a = LeftCrumb a (Tree a)
+             | RightCrumb a (Tree a)
+             deriving Show
+
+type Breadcrumbs a = [Crumb a]
+
+goLeft :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goLeft (Node a l r, bs) = (l, LeftCrumb a r:bs)
+goLeft (Empty,_) = error "Empty node"
+
+goRight :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goRight (Node a l r, bs) = (r, RightCrumb a l:bs)
+goRight (Empty,_) = error "Empty node"
+
+goUp :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goUp (l, LeftCrumb a r:bs) = (Node a l r, bs)
+goUp (r, RightCrumb a l:bs) = (Node a l r, bs)
+goUp (_, []) = error "Empty Breadcrumbs"
+
+
+(-:) :: a -> (a -> b) -> b
+a -: f = f a
