@@ -1,5 +1,7 @@
 module Tree where
 
+import Data.Char
+
 data Tree a = Empty
             | Node a (Tree a) (Tree a)
             deriving Show
@@ -64,3 +66,14 @@ goUp (_, []) = error "Empty Breadcrumbs"
 a -: f = f a
 
 type Zipper a = (Tree a, Breadcrumbs a)
+
+modify :: (a -> a) -> Zipper a -> Zipper a
+modify f (Node x l r, bs) = (Node (f x) l r, bs)
+modify _ (Empty, bs) = (Empty, bs)
+
+attach :: Tree a -> Zipper a -> Zipper a
+attach t (_, bs) = (t, bs)
+
+topMost :: Zipper a -> Zipper a
+topMost z@(_, []) = z
+topMost z = topMost $ goUp z

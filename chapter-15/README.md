@@ -141,3 +141,48 @@ ghci> (freeTree, []) -: goLeft -: goUp
 ### Zipper
 あるデータ構造の一部分の注目点とその周辺データを保持しているデータ構造を Zipper と一般に呼ぶ。
 
+今見ている要素を書き換える関数
+
+```haskell
+modify :: (a -> a) -> Zipper a -> Zipper a
+modify f (Node x l r, bs) = (Node (f x) l r, bs)
+modify _ (Empty, bs) = (Empty, bs)
+```
+
+左の部分木のルート要素を書き換えて元に戻る。
+
+```haskell
+import Data.Char
+
+ghci> (freeTree, []) -: goLeft -: modify toLower -: goUp
+(Node 'P' (Node 'o' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty))) (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty))),[])
+```
+
+さらに右も書き換える例
+
+```haskell
+ghci> (freeTree, []) -: goLeft -: modify toLower -: goUp -: goRight -: modify toLower -: goUp
+(Node 'P' (Node 'o' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty))) (Node 'l' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty))),[])
+```
+
+今見ている部分木を書き換える
+
+```haskell
+attach :: Tree a -> Zipper a -> Zipper a
+attach t (_, bs) = (t, bs)
+
+ghci> (freeTree, []) -: goLeft -: modify toLower -: goUp -: goRight -: attach (Node 'X' Empty Empty) -: goUp
+(Node 'P' (Node 'o' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty))) (Node 'X' Empty Empty),[])
+```
+
+一番上に戻る操作がほしい。
+
+```haskell
+topMost :: Zipper a -> Zipper a
+topMost z@(_, []) = z
+topMost z = topMost $ goUp z
+
+ghci> (freeTree, []) -: goLeft -: modify toLower -: goRight -: goLeft -: topMost
+(Node 'P' (Node 'o' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty))) (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty))),[])
+```
+
