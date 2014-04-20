@@ -76,6 +76,8 @@ goRight (Node _ _ r, bs) = (r, R:bs)
 goRight (Empty,_) = error "Empty node"
 ```
 
+もっと見栄えを良くしよう。
+
 ```haskell
 (-:) :: a -> (a -> b) -> b
 a -: f = f a
@@ -86,15 +88,21 @@ ghci> (freeTree, []) -: goRight -: goLeft
 (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty),[L,R])
 ```
 
+OK.
+
+### 上に辿りたい！
+
 今わかっていること
 
 - 今の木が親の木の右/左部分木なこと
 - その親の親の木の...
 
-上に辿りたい！
+上に辿りたいのであれば...
 
 - 親の木のルート要素
 - 親の木の部分木
+
+がそれぞれ必要。
 
 ```haskell
 data Crumb a = LeftCrumb a (Tree a)
