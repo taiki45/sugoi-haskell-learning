@@ -46,15 +46,15 @@ data Crumb a = LeftCrumb a (Tree a)
 
 type Breadcrumbs a = [Crumb a]
 
-goLeft :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goLeft :: Zipper a -> Zipper a
 goLeft (Node a l r, bs) = (l, LeftCrumb a r:bs)
 goLeft (Empty,_) = error "Empty node"
 
-goRight :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goRight :: Zipper a -> Zipper a
 goRight (Node a l r, bs) = (r, RightCrumb a l:bs)
 goRight (Empty,_) = error "Empty node"
 
-goUp :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goUp :: Zipper a -> Zipper a
 goUp (l, LeftCrumb a r:bs) = (Node a l r, bs)
 goUp (r, RightCrumb a l:bs) = (Node a l r, bs)
 goUp (_, []) = error "Empty Breadcrumbs"
@@ -62,3 +62,5 @@ goUp (_, []) = error "Empty Breadcrumbs"
 
 (-:) :: a -> (a -> b) -> b
 a -: f = f a
+
+type Zipper a = (Tree a, Breadcrumbs a)
