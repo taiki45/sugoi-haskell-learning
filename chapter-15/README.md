@@ -186,3 +186,40 @@ ghci> (freeTree, []) -: goLeft -: modify toLower -: goRight -: goLeft -: topMost
 (Node 'P' (Node 'o' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty))) (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty))),[])
 ```
 
+## List でも Zipper
+```hasklell
+type Crumb a = [a]
+type Zipper a = ([a], Crumb a)
+
+goDown :: Zipper a -> Zipper a
+goDown (x:xs, bs) = (xs, x:bs)
+goDown ([], _) = error "Empty List"
+
+goUp :: Zipper a -> Zipper a
+goUp (xs, b:bs) = (b:xs, bs)
+goUp (_, []) = error "Empty Crumb"
+
+topMost :: Zipper a -> Zipper a
+topMost z@(_, []) = z
+topMost z = topMost $ goUp z
+
+(-:) :: a -> (a -> b) -> b
+a -: f = f a
+
+modify :: (a -> a) -> Zipper a -> Zipper a
+modify f (x:xs, bs) = (f x:xs, bs)
+modify _ ([], _) = error "Empty List"
+
+attach :: [a] -> Zipper a -> Zipper a
+attach l (_, bs) = (l, bs)
+```
+
+Let's play!
+
+```haskell
+ghci> ([1..10], []) -: goDown -: goDown -: modify (*10) -: topMost
+([1,2,30,4,5,6,7,8,9,10],[])
+
+ghci> ([1..10], []) -: goDown -: goDown -: attach [0] -: topMost
+([1,2,0],[])
+```
