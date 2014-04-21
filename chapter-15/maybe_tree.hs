@@ -1,5 +1,6 @@
 module Tree where
 
+import Control.Monad
 import Data.Char
 
 data Tree a = Empty
@@ -48,18 +49,18 @@ data Crumb a = LeftCrumb a (Tree a)
 
 type Breadcrumbs a = [Crumb a]
 
-goLeft :: Zipper a -> Zipper a
-goLeft (Node a l r, bs) = (l, LeftCrumb a r:bs)
-goLeft (Empty,_) = error "Empty node"
+goLeft :: Zipper a -> Maybe (Zipper a)
+goLeft (Node a l r, bs) = return (l, LeftCrumb a r:bs)
+goLeft (Empty,_) = Nothing
 
-goRight :: Zipper a -> Zipper a
-goRight (Node a l r, bs) = (r, RightCrumb a l:bs)
-goRight (Empty,_) = error "Empty node"
+goRight :: Zipper a -> Maybe (Zipper a)
+goRight (Node a l r, bs) = return (r, RightCrumb a l:bs)
+goRight (Empty,_) = Nothing
 
-goUp :: Zipper a -> Zipper a
-goUp (l, LeftCrumb a r:bs) = (Node a l r, bs)
-goUp (r, RightCrumb a l:bs) = (Node a l r, bs)
-goUp (_, []) = error "Empty Breadcrumbs"
+goUp :: Zipper a -> Maybe (Zipper a)
+goUp (l, LeftCrumb a r:bs) = return (Node a l r, bs)
+goUp (r, RightCrumb a l:bs) = return (Node a l r, bs)
+goUp (_, []) = Nothing
 
 
 (-:) :: a -> (a -> b) -> b
@@ -74,6 +75,6 @@ modify _ (Empty, bs) = (Empty, bs)
 attach :: Tree a -> Zipper a -> Zipper a
 attach t (_, bs) = (t, bs)
 
-topMost :: Zipper a -> Zipper a
-topMost z@(_, []) = z
-topMost z = topMost $ goUp z
+topMost :: Zipper a -> Maybe (Zipper a)
+topMost z@(_, []) = return z
+topMost z = goUp z >>= topMost

@@ -223,3 +223,67 @@ ghci> ([1..10], []) -: goDown -: goDown -: modify (*10) -: topMost
 ghci> ([1..10], []) -: goDown -: goDown -: attach [0] -: topMost
 ([1,2,0],[])
 ```
+
+## 安全な Zipper
+```diff
+diff --git a/chapter-15/maybe_tree.hs b/chapter-15/maybe_tree.hs
+index b30b55d..7878b9d 100644
+--- a/chapter-15/maybe_tree.hs
++++ b/chapter-15/maybe_tree.hs
+@@ -1,5 +1,6 @@
+ module Tree where
+
++import Control.Monad
+ import Data.Char
+
+ data Tree a = Empty
+@@ -48,18 +49,18 @@ data Crumb a = LeftCrumb a (Tree a)
+
+ type Breadcrumbs a = [Crumb a]
+
+-goLeft :: Zipper a -> Zipper a
+-goLeft (Node a l r, bs) = (l, LeftCrumb a r:bs)
+-goLeft (Empty,_) = error "Empty node"
++goLeft :: Zipper a -> Maybe (Zipper a)
++goLeft (Node a l r, bs) = return (l, LeftCrumb a r:bs)
++goLeft (Empty,_) = Nothing
+
+-goRight :: Zipper a -> Zipper a
+-goRight (Node a l r, bs) = (r, RightCrumb a l:bs)
+-goRight (Empty,_) = error "Empty node"
++goRight :: Zipper a -> Maybe (Zipper a)
++goRight (Node a l r, bs) = return (r, RightCrumb a l:bs)
++goRight (Empty,_) = Nothing
+
+-goUp :: Zipper a -> Zipper a
+-goUp (l, LeftCrumb a r:bs) = (Node a l r, bs)
+-goUp (r, RightCrumb a l:bs) = (Node a l r, bs)
+-goUp (_, []) = error "Empty Breadcrumbs"
++goUp :: Zipper a -> Maybe (Zipper a)
++goUp (l, LeftCrumb a r:bs) = return (Node a l r, bs)
++goUp (r, RightCrumb a l:bs) = return (Node a l r, bs)
++goUp (_, []) = Nothing
+
+
+ (-:) :: a -> (a -> b) -> b
+@@ -74,6 +75,6 @@ modify _ (Empty, bs) = (Empty, bs)
+ attach :: Tree a -> Zipper a -> Zipper a
+ attach t (_, bs) = (t, bs)
+
+-topMost :: Zipper a -> Zipper a
+-topMost z@(_, []) = z
+-topMost z = topMost $ goUp z
++topMost :: Zipper a -> Maybe (Zipper a)
++topMost z@(_, []) = return z
++topMost z = goUp z >>= topMost
+```
+
+これだけで安全に！
+
+```haskell
+*Tree> return (freeTree, []) >>= goLeft
+Just (Node 'O' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty)),[LeftCrumb 'P' (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty)))])
+
+*Tree> goLeft >=> goRight $ (freeTree, [])
+Just (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty),[RightCrumb 'O' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)),LeftCrumb 'P' (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty)))])
+```
