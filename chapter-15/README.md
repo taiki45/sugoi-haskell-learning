@@ -297,3 +297,62 @@ ghci> (myDisk, []) -: fsTo "goat_yelling_like_man.wmv" -: fsTo "aaa"
 ```
 
 パターン照合に失敗する。もっと優雅に失敗させる。
+
+```diff
+diff --git a/chapter-15/maybe_file.hs b/chapter-15/maybe_file.hs
+index d43bc28..7d5bdfc 100644
+--- a/chapter-15/maybe_file.hs
++++ b/chapter-15/maybe_file.hs
+@@ -1,7 +1,10 @@
+ module File where
+
+-import Data.List (break)
++import Control.Monad
++--import Data.List (break)
+
++(-:) :: a -> (a -> b) -> b
++a -: f = f a
+
+ type Name = String
+ type Data = String
+@@ -35,21 +38,24 @@ data FSCrumb = FSCrumb Name [FSItem] [FSItem] deriving (Show)
+
+ type FSZipper = (FSItem, [FSCrumb])
+
+-fsUp :: FSZipper -> FSZipper
+-fsUp (item, FSCrumb name ls rs:bs) = (Folder name (ls ++ [item] ++ rs), bs)
++fsUp :: FSZipper -> Maybe FSZipper
++fsUp (item, FSCrumb name ls rs:bs) = return (Folder name (ls ++ [item] ++ rs), bs)
++fsUp (_, []) = Nothing
+
+-fsTo :: Name -> FSZipper -> FSZipper
+-fsTo name (Folder folderName items, bs) =
+-    let (ls, item:rs) = break (nameIs name) items
+-    in  (item, FSCrumb folderName ls rs:bs)
++fsTo :: Name -> FSZipper -> Maybe FSZipper
++fsTo name (Folder folderName items, bs)
++    | null result = Nothing
++    | otherwise = let item:rs = result in return (item, FSCrumb folderName ls rs:bs)
++    where (ls, result) = break (nameIs name) items
++fsTo _ (File _ _, _) = Nothing
+
+ nameIs :: Name -> FSItem -> Bool
+ nameIs name (Folder folderName _) = name == folderName
+ nameIs name (File fileName _) = name == fileName
+
+ fsRename :: Name -> FSZipper -> FSZipper
+-fsRename newName (Folder name items, bs) = (Folder newName items, bs)
+-fsRename newName (File name dat, bs) = (File newName dat, bs)
++fsRename newName (Folder _ items, bs) = (Folder newName items, bs)
++fsRename newName (File _ dat, bs) = (File newName dat, bs)
+
+ fsNewFile :: FSItem -> FSZipper -> FSZipper
+ fsNewFile item (Folder folderName items, bs) =
+```
+
+使う
+
+```haskell
+ghci> return (myDisk, []) >>= fsTo "goat_yelling_like_man.wmv" >>= fsTo "aaa"
+Nothing
+```
