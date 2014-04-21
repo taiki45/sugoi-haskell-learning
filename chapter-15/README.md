@@ -287,3 +287,13 @@ Just (Node 'O' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)) (Node 'Y
 *Tree> goLeft >=> goRight $ (freeTree, [])
 Just (Node 'Y' (Node 'S' Empty Empty) (Node 'A' Empty Empty),[RightCrumb 'O' (Node 'L' (Node 'N' Empty Empty) (Node 'T' Empty Empty)),LeftCrumb 'P' (Node 'L' (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty)) (Node 'A' (Node 'A' Empty Empty) (Node 'C' Empty Empty)))])
 ```
+
+## 安全なFS
+まずは現状から
+
+```haskell
+ghci> (myDisk, []) -: fsTo "goat_yelling_like_man.wmv" -: fsTo "aaa"
+*** Exception: maybe_file.hs:(44,1)-(46,43): Non-exhaustive patterns in function fsTo
+```
+
+パターン照合に失敗する。もっと優雅に失敗させる。
