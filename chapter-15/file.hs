@@ -1,5 +1,7 @@
 module File where
 
+import Data.List (break)
+
 type Name = String
 type Data = String
 data FSItem = File Name Data
@@ -34,8 +36,6 @@ type FSZipper = (FSItem, [FSCrumb])
 
 fsUp :: FSZipper -> FSZipper
 fsUp (item, FSCrumb name ls rs:bs) = (Folder name (ls ++ [item] ++ rs), bs)
-
-import Data.List (break)
 
 fsTo :: Name -> FSZipper -> FSZipper
 fsTo name (Folder folderName items, bs) =
