@@ -31,18 +31,6 @@ data Direction = L
 
 type Directions = [Direction]
 
-changeToP :: Directions -> Tree Char -> Tree Char
-changeToP (L:ds) (Node x l r) = Node x (changeToP ds l) r
-changeToP (R:ds) (Node x l r) = Node x l (changeToP ds r)
-changeToP [] (Node _ l r) = Node 'P' l r
-changeToP _ Empty = error "Empty node"
-
-elemAt :: Directions -> Tree a -> a
-elemAt (L:ds) (Node _ l _) = elemAt ds l
-elemAt (R:ds) (Node _ _ r) = elemAt ds r
-elemAt [] (Node a _ _) = a
-elemAt _ Empty = error "Empty node"
-
 data Crumb a = LeftCrumb a (Tree a)
              | RightCrumb a (Tree a)
              deriving Show
