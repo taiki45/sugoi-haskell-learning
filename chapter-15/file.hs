@@ -34,10 +34,10 @@ data FSCrumb = FSCrumb Name [FSItem] [FSItem] deriving (Show)
 
 type FSZipper = (FSItem, [FSCrumb])
 
-fsUp :: FSZipper -> FSZipper
+fsUp :: FSZipper -> Maybe FSZipper
 fsUp (item, FSCrumb name ls rs:bs) = (Folder name (ls ++ [item] ++ rs), bs)
 
-fsTo :: Name -> FSZipper -> FSZipper
+fsTo :: Name -> FSZipper -> Maybe FSZipper
 fsTo name (Folder folderName items, bs) =
     let (ls, item:rs) = break (nameIs name) items
     in  (item, FSCrumb folderName ls rs:bs)

@@ -36,19 +36,20 @@ data Crumb a = LeftCrumb a (Tree a)
              deriving Show
 
 type Breadcrumbs a = [Crumb a]
+type Error a = Either String a
 
-goLeft :: Zipper a -> Maybe (Zipper a)
+goLeft :: Zipper a -> Error (Zipper a)
 goLeft (Node a l r, bs) = return (l, LeftCrumb a r:bs)
-goLeft (Empty,_) = Nothing
+goLeft (Empty,_) = Left "miss in left"
 
-goRight :: Zipper a -> Maybe (Zipper a)
+goRight :: Zipper a -> Error (Zipper a)
 goRight (Node a l r, bs) = return (r, RightCrumb a l:bs)
-goRight (Empty,_) = Nothing
+goRight (Empty,_) = Left "miss in right"
 
-goUp :: Zipper a -> Maybe (Zipper a)
+goUp :: Zipper a -> Error (Zipper a)
 goUp (l, LeftCrumb a r:bs) = return (Node a l r, bs)
 goUp (r, RightCrumb a l:bs) = return (Node a l r, bs)
-goUp (_, []) = Nothing
+goUp (_, []) = Left "up miss"
 
 
 (-:) :: a -> (a -> b) -> b
@@ -63,6 +64,6 @@ modify _ (Empty, bs) = (Empty, bs)
 attach :: Tree a -> Zipper a -> Zipper a
 attach t (_, bs) = (t, bs)
 
-topMost :: Zipper a -> Maybe (Zipper a)
+topMost :: Zipper a -> Error (Zipper a)
 topMost z@(_, []) = return z
 topMost z = goUp z >>= topMost
